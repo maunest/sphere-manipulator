@@ -1,0 +1,59 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python 3.11.1
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.11.1"
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python3-tk python3-pygame python3-numpy python3-opengl freeglut3
+
+  test:
+
+    needs: build
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python 3.11.1
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.11.1"
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python3-tk xvfb freeglut3
+        pip install PyOpenGL PyOpenGL_accelerate
+        pip install pyopengl
+        pip install pygame numpy
+
+    - name: Check installed Python packages
+      run: |
+        pip list
+        pip freeze
+
+    - name: Start test
+      run: xvfb-run --auto-servernum python -m unittest discover -s tests
